@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/rabbitprincess/x402-facilitator/evm"
 	"github.com/rabbitprincess/x402-facilitator/evm/eip3009"
 	"github.com/rabbitprincess/x402-facilitator/types"
@@ -53,8 +55,8 @@ func NewEVMFacilitator(scheme string, url string, privateKeyHex string) (*EVMFac
 //   - verify resource is not already paid for (next version)
 func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
 	// Step 1: Payload format
-	var evmPayload *evm.EVMPayload
-	if err := json.Unmarshal([]byte(payload.Payload), evmPayload); err != nil {
+	var evmPayload evm.EVMPayload
+	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
 			InvalidReason: fmt.Sprintf("Invalid payload format: %v", err),
@@ -106,8 +108,8 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 }
 
 func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
-	var evmPayload *evm.EVMPayload
-	if err := json.Unmarshal([]byte(payload.Payload), evmPayload); err != nil {
+	var evmPayload evm.EVMPayload
+	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
 		return &types.PaymentSettleResponse{
 			Success: false,
 			Error:   fmt.Sprintf("invalid payload format: %v", err),
@@ -131,13 +133,16 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode signature: %w", err)
 	}
-	r, s, v, err := evm.ParseSignature(sig)
+
+	r, s, v, err := evm.ParseSignature(sig) // client signature
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse signature: %w", err)
 	}
 
 	tx, err := contract.TransferWithAuthorization(
-		nil,
+		&bind.TransactOpts{ // facilitator signature
+			Signer: evm.ToGethSigner(t.signer, networkID),
+		},
 		evmPayload.Authorization.From,
 		evmPayload.Authorization.To,
 		evmPayload.Authorization.Value,
