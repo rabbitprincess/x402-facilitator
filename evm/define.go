@@ -4,7 +4,7 @@ import "github.com/ethereum/go-ethereum/common"
 
 type ChainInfo struct {
 	ChainID        uint64
-	TokenContracts map[string]common.Address // 예: "USDC" -> 0xA0b...
+	TokenContracts map[string]common.Address
 }
 
 var EVMChains = map[string]ChainInfo{
@@ -12,7 +12,6 @@ var EVMChains = map[string]ChainInfo{
 		ChainID: 1,
 		TokenContracts: map[string]common.Address{
 			"USDC": common.HexToAddress("0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
-			"DAI":  common.HexToAddress("0x6b175474e89094c44da98b954eedeac495271d0f"),
 		},
 	},
 	"base": {
