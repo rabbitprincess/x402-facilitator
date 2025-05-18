@@ -1,5 +1,7 @@
 package types
 
+import "encoding/json"
+
 // PaymentRequirements defines the structure for accepted payments by the resource server.
 // This corresponds to the server's response in the 402 Payment Required flow.
 type PaymentRequirements struct {
@@ -16,7 +18,7 @@ type PaymentRequirements struct {
 	// MIME type of the resource response
 	MimeType string `json:"mimeType"`
 	// Output schema of the resource response (optional)
-	OutputSchema map[string]any `json:"outputSchema,omitempty"`
+	OutputSchema *json.RawMessage `json:"outputSchema,omitempty"`
 	// Address to pay value to
 	PayTo string `json:"payTo"`
 	// Maximum time in seconds for the resource server to respond
@@ -24,7 +26,7 @@ type PaymentRequirements struct {
 	// Address of the EIP-3009 compliant ERC20 contract
 	Asset string `json:"asset"`
 	// Extra information about the payment details specific to the scheme
-	Extra map[string]any `json:"extra,omitempty"`
+	Extra *json.RawMessage `json:"extra,omitempty"`
 }
 
 // PaymentPayload represents the data the client sends in the X-PAYMENT header.
@@ -36,7 +38,7 @@ type PaymentPayload struct {
 	// Network ID of the accepted paymentRequirements the client is using to pay
 	Network string `json:"network"`
 	// Payload is E-dependent and may contain authorization and signature data
-	Payload interface{} `json:"payload"`
+	Payload json.RawMessage `json:"payload"`
 }
 
 // PaymentVerifyRequest is the request body sent to facilitator's /verify endpoint.
@@ -52,6 +54,7 @@ type PaymentVerifyResponse struct {
 	IsValid bool `json:"isValid"`
 	// Error message or reason for invalidity, if applicable
 	InvalidReason string `json:"invalidReason,omitempty"`
+	Payer         string `json:"payer,omitempty"`
 }
 
 // PaymentSettleRequest is the request body sent to facilitator's /settle endpoint.

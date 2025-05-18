@@ -2,13 +2,20 @@ package evm
 
 import (
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
-type Address [20]byte
+// ExactEvmPayloadAuthorization represents the payload for an exact EVM payment ERC-3009
+// authorization EIP-712 typed data message
+type EVMPayload struct {
+	Signature     string         `json:"signature"`
+	Authorization *Authorization `json:"authorization"`
+}
 
 type Authorization struct {
-	From        Address
-	To          Address
+	From        common.Address
+	To          common.Address
 	Value       *big.Int
 	ValidAfter  *big.Int
 	ValidBefore *big.Int
@@ -41,7 +48,7 @@ type DomainConfig struct {
 	Name              string
 	Version           string
 	ChainID           int64
-	VerifyingContract Address
+	VerifyingContract common.Address
 }
 
 func (d DomainConfig) ToMessageHash() []byte {

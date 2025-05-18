@@ -16,7 +16,7 @@ func SignEip3009(auth *Authorization, domain *DomainConfig, signer Signer) (stri
 
 	sig, err := signer(hashBytes)
 	if err != nil {
-		return "", err
+		return "s", err
 	}
 
 	return hex.EncodeToString(sig), nil
