@@ -1,31 +1,35 @@
 package evm
 
-import "github.com/ethereum/go-ethereum/common"
+import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+)
 
 type ChainInfo struct {
-	ChainID        uint64
+	ChainID        *big.Int
 	TokenContracts map[string]common.Address
 }
 
 var EVMChains = map[string]ChainInfo{
 	"ethereum": {
-		ChainID: 1,
+		ChainID: big.NewInt(1),
 		TokenContracts: map[string]common.Address{
 			"USDC": common.HexToAddress("0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"),
 		},
 	},
 	"base": {
-		ChainID: 8453,
+		ChainID: big.NewInt(8453),
 		TokenContracts: map[string]common.Address{
 			"USDC": common.HexToAddress("0xd9aaEC86B65d86f6a7b5B1b0c42FFA531710b6CA"),
 		},
 	},
 }
 
-func GetChainID(chain string) (uint64, bool) {
+func GetChainID(chain string) (*big.Int, bool) {
 	chainInfo, ok := EVMChains[chain]
 	if !ok {
-		return 0, false
+		return nil, false
 	}
 	return chainInfo.ChainID, true
 }

@@ -1,14 +1,26 @@
 package evm
 
 import (
+	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/sha3"
 )
+
+func GenerateEIP3009Nonce() (string, error) {
+	var nonce [32]byte
+	_, err := rand.Read(nonce[:])
+	if err != nil {
+		return "", fmt.Errorf("failed to generate nonce: %w", err)
+	}
+	nonceHex := hex.EncodeToString(nonce[:])
+	return nonceHex, nil
+}
 
 func Keccak256(data ...[]byte) []byte {
 	h := sha3.NewLegacyKeccak256()
