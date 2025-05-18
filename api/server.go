@@ -8,27 +8,32 @@ import (
 	"github.com/rabbitprincess/x402-facilitator/api/middleware"
 )
 
+// server represents the HTTP server for the API
+type server struct {
+	*echo.Echo
+}
+
+// Ensure server implements http.Handler
 var _ http.Handler = (*server)(nil)
 
+// NewServer creates and configures a new API server
 func NewServer() *server {
-	e := &server{
+	s := &server{
 		Echo: echo.New(),
 	}
 
-	e.Use(middleware.RequestID())
-	e.Use(middleware.Logger())
-	e.Use(middleware.ErrorWrapper())
-	e.Use(echomiddleware.RecoverWithConfig(echomiddleware.RecoverConfig{
+	// Register middleware
+	s.Use(middleware.RequestID())
+	s.Use(middleware.Logger())
+	s.Use(middleware.ErrorWrapper())
+	s.Use(echomiddleware.RecoverWithConfig(echomiddleware.RecoverConfig{
 		DisableErrorHandler: true,
 	}))
-	e.Use(echomiddleware.CORS())
+	s.Use(echomiddleware.CORS())
 
-	e.POST("/verify", e.Verify)
-	e.POST("/settle", e.Settle)
+	// Register routes
+	s.POST("/verify", s.Verify)
+	s.POST("/settle", s.Settle)
 
-	return e
-}
-
-type server struct {
-	*echo.Echo
+	return s
 }
