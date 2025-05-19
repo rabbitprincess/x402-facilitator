@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serverCmd = &cobra.Command{
+var cmd = &cobra.Command{
 	Use:   "facilitator",
 	Short: "Start the facilitator server",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -29,39 +29,48 @@ var (
 )
 
 func init() {
-	serverCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
+	cmd.
+		PersistentFlags().
+		StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
 }
 
 func main() {
-	if err := serverCmd.Execute(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to execute command")
+	if err := cmd.Execute(); err != nil {
+		log.Fatal().Err(err).
+			Msg("Failed to execute command")
 	}
 }
 
 func run() {
 	config, err := LoadConfig(configPath)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration, Shutting down...")
+		log.Fatal().Err(err).
+			Msg("Failed to load configuration, shutting down...")
 	}
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	facilitator, err := facilitator.NewFacilitator(&logger, config.Scheme, config.Url, config.PrivateKey)
+	log.Logger = zerolog.New(os.Stdout).With().
+		Timestamp().
+		Caller().
+		Logger()
+
+	facilitator, err := facilitator.NewFacilitator(config.Scheme, config.Url, config.PrivateKey)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("Failed to create facilitator, Shutting down...")
+		log.Fatal().Err(err).
+			Msg("Failed to create facilitator, shutting down...")
 	}
 
-	// &logger, facilitator 넣어서 내부에서 써주세영
-	api := api.NewServer()
+	api := api.NewServer(&facilitator)
 
 	// Initialize Server
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: api.Router(),
+		Handler: api,
 	}
 
 	go func() {
-		logger.Info().Msgf("Starting server on port %d", config.Port)
+		log.Info().Msgf("Starting server on port %d", config.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatal().Err(err).Msg("Failed to start server, Shutting down...")
+			log.Fatal().Err(err).
+				Msg("Failed to start server, shutting down...")
 		}
 	}()
 
@@ -75,7 +84,9 @@ func run() {
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		logger.Fatal().Err(err).Msg("Failed to shutdown server gracefully")
+		log.Fatal().Err(err).
+			Msg("Failed to shutdown server gracefully")
 	}
-	logger.Info().Msg("Server shutdown gracefully")
+	log.Info().
+		Msg("Server shutdown gracefully")
 }

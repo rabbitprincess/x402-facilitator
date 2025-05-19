@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/rabbitprincess/x402-facilitator/types"
-	"github.com/rs/zerolog"
 )
 
 type Facilitator interface {
@@ -13,10 +12,10 @@ type Facilitator interface {
 	Supported() []*types.SupportedKind
 }
 
-func NewFacilitator(log *zerolog.Logger, scheme types.Scheme, url string, privateKeyHex string) (Facilitator, error) {
+func NewFacilitator(scheme types.Scheme, url string, privateKeyHex string) (Facilitator, error) {
 	switch scheme {
 	case types.EVM:
-		return NewEVMFacilitator(log, scheme, url, privateKeyHex)
+		return NewEVMFacilitator(scheme, url, privateKeyHex)
 	default:
 		return nil, fmt.Errorf("unsupported scheme: %s", scheme)
 	}

@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/rs/zerolog"
 
 	"github.com/rabbitprincess/x402-facilitator/evm"
 	"github.com/rabbitprincess/x402-facilitator/evm/eip3009"
@@ -19,13 +18,12 @@ import (
 var _ Facilitator = (*EVMFacilitator)(nil)
 
 type EVMFacilitator struct {
-	log    *zerolog.Logger
 	scheme types.Scheme
 	client *ethclient.Client
 	signer evm.Signer
 }
 
-func NewEVMFacilitator(log *zerolog.Logger, scheme types.Scheme, url string, privateKeyHex string) (*EVMFacilitator, error) {
+func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*EVMFacilitator, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
@@ -38,7 +36,6 @@ func NewEVMFacilitator(log *zerolog.Logger, scheme types.Scheme, url string, pri
 	signer := evm.NewRawPrivateSigner(privateKey)
 
 	return &EVMFacilitator{
-		log:    log,
 		scheme: scheme,
 		client: client,
 		signer: signer,
