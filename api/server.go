@@ -12,14 +12,14 @@ import (
 // server represents the HTTP server for the API
 type server struct {
 	*echo.Echo
-	facilitator *facilitator.Facilitator
+	facilitator facilitator.Facilitator
 }
 
 // Ensure server implements http.Handler
 var _ http.Handler = (*server)(nil)
 
 // NewServer creates and configures a new API server
-func NewServer(facilitator *facilitator.Facilitator) *server {
+func NewServer(facilitator facilitator.Facilitator) *server {
 	s := &server{
 		Echo:        echo.New(),
 		facilitator: facilitator,
