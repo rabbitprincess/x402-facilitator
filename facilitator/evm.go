@@ -18,12 +18,12 @@ import (
 var _ Facilitator = (*EVMFacilitator)(nil)
 
 type EVMFacilitator struct {
-	scheme string
+	scheme types.Scheme
 	client *ethclient.Client
 	signer evm.Signer
 }
 
-func NewEVMFacilitator(scheme string, url string, privateKeyHex string) (*EVMFacilitator, error) {
+func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*EVMFacilitator, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
@@ -64,7 +64,7 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	}
 
 	// Step 2: Scheme verification
-	if payload.Scheme != t.scheme || req.Scheme != t.scheme {
+	if payload.Scheme != string(t.scheme) || req.Scheme != string(t.scheme) {
 		return &types.PaymentVerifyResponse{
 			IsValid: false,
 			InvalidReason: fmt.Sprintf("Incompatible payload scheme. payload: %s, paymentRequirements: %s, supported: %s",
