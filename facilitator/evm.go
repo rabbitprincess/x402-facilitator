@@ -85,6 +85,20 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	_ = chainID
 
 	// Step 4: Verify signature (EIP-712)
+	sig, err := hex.DecodeString(evmPayload.Signature)
+	if err != nil {
+		return nil, err
+	}
+	digest := evmPayload.Authorization.ToMessageHash()
+	if valid, err := evm.VerifySignature(digest, sig); err != nil {
+		return nil, err
+	} else if !valid {
+		return &types.PaymentVerifyResponse{
+			IsValid:       false,
+			InvalidReason: "invalid_signature",
+			Payer:         evmPayload.Authorization.From.String(),
+		}, nil
+	}
 
 	// Step 5: Validate payTo
 
