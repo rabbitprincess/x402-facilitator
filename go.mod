@@ -5,7 +5,6 @@ go 1.24.0
 require (
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4
 	github.com/ethereum/go-ethereum v1.15.11
-	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.8.1
