@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"github.com/rabbitprincess/x402-facilitator/types"
 )
 

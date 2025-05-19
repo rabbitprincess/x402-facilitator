@@ -58,7 +58,7 @@ func run() {
 			Msg("Failed to create facilitator, shutting down...")
 	}
 
-	api := api.NewServer(&facilitator)
+	api := api.NewServer(facilitator)
 
 	// Initialize Server
 	server := &http.Server{
