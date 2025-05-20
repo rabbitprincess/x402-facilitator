@@ -29,28 +29,22 @@ var (
 )
 
 func init() {
-	cmd.
-		PersistentFlags().
+	cmd.PersistentFlags().
 		StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
 }
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to execute command")
+		log.Fatal().Err(err).Msg("Failed to execute command")
 	}
 }
 
 func run() {
 	config, err := LoadConfig(configPath)
 	if err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to load configuration, shutting down...")
+		log.Fatal().Err(err).Msg("Failed to load configuration, shutting down...")
 	}
-	log.Logger = zerolog.New(os.Stdout).With().
-		Timestamp().
-		Caller().
-		Logger()
+	log.Logger = zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
 
 	facilitator, err := facilitator.NewFacilitator(config.Scheme, config.Url, config.PrivateKey)
 	if err != nil {
