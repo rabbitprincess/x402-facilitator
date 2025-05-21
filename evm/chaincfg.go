@@ -6,15 +6,35 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type ChainInfo struct {
-	ChainID        *big.Int
-	TokenContracts map[string]*DomainConfig
+var chainName = map[int]string{
+	1:        "ethereum",
+	11155111: "sepolia",
+	8453:     "base",
+	84532:    "base-sepolia",
+	10:       "optimism",
+	42161:    "optimism-sepolia",
 }
 
-var EVMChains = map[string]ChainInfo{
+func GetChainName(chainID *big.Int) string {
+	if chainID == nil {
+		return ""
+	}
+	name, ok := chainName[int(chainID.Int64())]
+	if !ok {
+		return ""
+	}
+	return name
+}
+
+type ChainInfo struct {
+	ChainID        *big.Int
+	TokenContracts map[string]DomainConfig
+}
+
+var chainInfo = map[string]ChainInfo{
 	"ethereum": {
 		ChainID: big.NewInt(1),
-		TokenContracts: map[string]*DomainConfig{
+		TokenContracts: map[string]DomainConfig{
 			"USDC": {
 				Name:              "USD Coin",
 				Version:           "2",
@@ -25,7 +45,7 @@ var EVMChains = map[string]ChainInfo{
 	},
 	"base": {
 		ChainID: big.NewInt(8453),
-		TokenContracts: map[string]*DomainConfig{
+		TokenContracts: map[string]DomainConfig{
 			"USDC": {
 				Name:              "USD Coin",
 				Version:           "2",
@@ -36,7 +56,7 @@ var EVMChains = map[string]ChainInfo{
 	},
 	"base-sepolia": {
 		ChainID: big.NewInt(84532),
-		TokenContracts: map[string]*DomainConfig{
+		TokenContracts: map[string]DomainConfig{
 			"USDC": {
 				Name:              "USDC",
 				Version:           "2",
@@ -48,7 +68,7 @@ var EVMChains = map[string]ChainInfo{
 }
 
 func GetChainID(chain string) *big.Int {
-	chainInfo, ok := EVMChains[chain]
+	chainInfo, ok := chainInfo[chain]
 	if !ok {
 		return nil
 	}
@@ -56,13 +76,13 @@ func GetChainID(chain string) *big.Int {
 }
 
 func GetDomainConfig(chain, token string) *DomainConfig {
-	chainInfo, ok := EVMChains[chain]
+	chainInfo, ok := chainInfo[chain]
 	if !ok {
 		return nil
 	}
-	tokenContract, ok := chainInfo.TokenContracts[token]
+	domainConfig, ok := chainInfo.TokenContracts[token]
 	if !ok {
 		return nil
 	}
-	return tokenContract
+	return &domainConfig
 }

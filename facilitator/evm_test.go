@@ -21,14 +21,14 @@ const (
 )
 
 func TestEVMVerify(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(types.EVM, EVMUrl, PrivateKey)
+	facilitator, err := NewEVMFacilitator(EVMUrl, PrivateKey)
 	require.NoError(t, err)
 
 	_ = facilitator
 }
 
 func TestEVMSettle(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(types.EVM, EVMUrl, PrivateKey)
+	facilitator, err := NewEVMFacilitator(EVMUrl, PrivateKey)
 	require.NoError(t, err)
 
 	privKey, err := hex.DecodeString("")

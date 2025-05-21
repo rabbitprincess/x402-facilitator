@@ -1,9 +1,11 @@
 package facilitator
 
 import (
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/v2"
 	"github.com/ethereum/go-ethereum/common"
@@ -17,16 +19,28 @@ import (
 var _ Facilitator = (*EVMFacilitator)(nil)
 
 type EVMFacilitator struct {
-	scheme  types.Scheme
+	scheme    types.Scheme
+	network   string
+	networkID *big.Int
+
 	client  *ethclient.Client
 	signer  evm.Signer
 	address common.Address
 }
 
-func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*EVMFacilitator, error) {
+func NewEVMFacilitator(url string, privateKeyHex string) (*EVMFacilitator, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
+	}
+
+	networkId, err := client.NetworkID(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network ID: %w", err)
+	}
+	network := evm.GetChainName(networkId)
+	if network == "" {
+		return nil, fmt.Errorf("unsupported network ID: %s", networkId.String())
 	}
 
 	privateKey, err := hex.DecodeString(privateKeyHex)
@@ -40,7 +54,10 @@ func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*
 	}
 
 	return &EVMFacilitator{
-		scheme:  scheme,
+		scheme:    types.EVM,
+		network:   network,
+		networkID: networkId,
+
 		client:  client,
 		signer:  signer,
 		address: address,
@@ -79,6 +96,13 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	}
 
 	// Step 3: Network info
+	if payload.Network != t.network {
+		return &types.PaymentVerifyResponse{
+			IsValid:       false,
+			InvalidReason: "network_mismatch",
+			Payer:         evmPayload.Authorization.From.String(),
+		}, nil
+	}
 	chainID := evm.GetChainID(payload.Network)
 	if chainID == nil {
 		return &types.PaymentVerifyResponse{
@@ -87,7 +111,13 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
-	_ = chainID
+	if chainID.Cmp(t.networkID) != 0 {
+		return &types.PaymentVerifyResponse{
+			IsValid:       false,
+			InvalidReason: "network_id_mismatch",
+			Payer:         evmPayload.Authorization.From.String(),
+		}, nil
+	}
 
 	// Step 4: Verify signature (EIP-712)
 	sig, err := hex.DecodeString(evmPayload.Signature)
@@ -99,7 +129,6 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	if err != nil {
 		return nil, err
 	}
-
 	if valid := evm.VerifySignature(pubkey, digest, sig); !valid {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
@@ -157,24 +186,18 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 	if err != nil {
 		return nil, fmt.Errorf("contract bind failed: %w", err)
 	}
-	sig, err := hex.DecodeString(evmPayload.Signature)
+	clientSig, err := hex.DecodeString(evmPayload.Signature) // client signature
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode signature: %w", err)
 	}
-	if sig[64] < 27 {
-		sig[64] += 27
+	if clientSig[64] < 27 {
+		clientSig[64] += 27
 	}
 
-	// r, s, v, err := evm.ParseSignature(sig) // client signature
-	// if err != nil {
-	// return nil, fmt.Errorf("failed to parse signature: %w", err)
-	// }
-
 	tx, err := contract.TransferWithAuthorization(
-		&bind.TransactOpts{ // facilitator signature
-			Signer:   evm.ToGethSigner(t.signer, networkID),
-			From:     t.address,
-			GasLimit: 100000,
+		&bind.TransactOpts{
+			Signer: evm.ToGethSigner(t.signer, networkID), // facilitator signature
+			From:   t.address,
 		},
 		evmPayload.Authorization.From,
 		evmPayload.Authorization.To,
@@ -182,7 +205,7 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 		evmPayload.Authorization.ValidAfter,
 		evmPayload.Authorization.ValidBefore,
 		evmPayload.Authorization.Nonce,
-		sig,
+		clientSig,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to transfer with authorization %w", err)
@@ -196,6 +219,10 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 }
 
 func (t *EVMFacilitator) Supported() []*types.SupportedKind {
-	// TODO add scheme
-	return nil
+	return []*types.SupportedKind{
+		{
+			Scheme:  string(t.scheme),
+			Network: t.network,
+		},
+	}
 }

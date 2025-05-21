@@ -15,8 +15,8 @@ type Facilitator interface {
 func NewFacilitator(scheme types.Scheme, url string, privateKeyHex string) (Facilitator, error) {
 	switch scheme {
 	case types.EVM:
-		return NewEVMFacilitator(scheme, url, privateKeyHex)
+		return NewEVMFacilitator(url, privateKeyHex)
 	default:
-		return nil, fmt.Errorf("unsupported scheme: %s", scheme)
+		return nil, fmt.Errorf("unsupporsed scheme: %s", scheme)
 	}
 }
