@@ -1,7 +1,9 @@
 package evm
 
 import (
+	"bytes"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -11,6 +13,19 @@ import (
 type EVMPayload struct {
 	Signature     string         `json:"signature"`
 	Authorization *Authorization `json:"authorization"`
+}
+
+func NewAuthorization(from, to string, value *big.Int) *Authorization {
+	now := time.Now().Unix()
+	authorization := &Authorization{
+		From:        common.HexToAddress(from),
+		To:          common.HexToAddress(to),
+		Value:       value,
+		ValidAfter:  big.NewInt(0),
+		ValidBefore: big.NewInt(now + 3600), // 1 hour
+		Nonce:       GenerateEIP3009Nonce(),
+	}
+	return authorization
 }
 
 type Authorization struct {
@@ -26,22 +41,17 @@ func (a Authorization) ToMessageHash() []byte {
 	hash := Keccak256([]byte(
 		"TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"),
 	)
-	from := padAddress(a.From)
-	to := padAddress(a.To)
-	value := padBigInt(a.Value)
-	validAfter := padBigInt(a.ValidAfter)
-	validBefore := padBigInt(a.ValidBefore)
-	nonce := a.Nonce[:]
 
-	return Keccak256(
+	encoded := bytes.Join([][]byte{
 		hash,
-		from,
-		to,
-		value,
-		validAfter,
-		validBefore,
-		nonce,
-	)
+		padAddress(a.From),
+		padAddress(a.To),
+		padBigInt(a.Value),
+		padBigInt(a.ValidAfter),
+		padBigInt(a.ValidBefore),
+		a.Nonce[:], // already 32 bytes
+	}, nil)
+	return Keccak256(encoded)
 }
 
 type DomainConfig struct {

@@ -31,7 +31,7 @@ var (
 
 // Eip3009MetaData contains all meta data concerning the Eip3009 contract.
 var Eip3009MetaData = &bind.MetaData{
-	ABI: "[{\"name\":\"transferWithAuthorization\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"validAfter\",\"type\":\"uint256\"},{\"name\":\"validBefore\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"bytes32\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"outputs\":[],\"payable\":false}]",
+	ABI: "[{\"name\":\"transferWithAuthorization\",\"type\":\"function\",\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"validAfter\",\"type\":\"uint256\"},{\"name\":\"validBefore\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"bytes32\"},{\"name\":\"signature\",\"type\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"}]",
 }
 
 // Eip3009ABI is the input ABI used to generate the binding from.
@@ -180,23 +180,23 @@ func (_Eip3009 *Eip3009TransactorRaw) Transact(opts *bind.TransactOpts, method s
 	return _Eip3009.Contract.contract.Transact(opts, method, params...)
 }
 
-// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xe3ee160e.
+// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xcf092995.
 //
-// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) returns()
-func (_Eip3009 *Eip3009Transactor) TransferWithAuthorization(opts *bind.TransactOpts, from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _Eip3009.contract.Transact(opts, "transferWithAuthorization", from, to, value, validAfter, validBefore, nonce, v, r, s)
+// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, bytes signature) returns()
+func (_Eip3009 *Eip3009Transactor) TransferWithAuthorization(opts *bind.TransactOpts, from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, signature []byte) (*types.Transaction, error) {
+	return _Eip3009.contract.Transact(opts, "transferWithAuthorization", from, to, value, validAfter, validBefore, nonce, signature)
 }
 
-// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xe3ee160e.
+// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xcf092995.
 //
-// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) returns()
-func (_Eip3009 *Eip3009Session) TransferWithAuthorization(from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _Eip3009.Contract.TransferWithAuthorization(&_Eip3009.TransactOpts, from, to, value, validAfter, validBefore, nonce, v, r, s)
+// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, bytes signature) returns()
+func (_Eip3009 *Eip3009Session) TransferWithAuthorization(from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, signature []byte) (*types.Transaction, error) {
+	return _Eip3009.Contract.TransferWithAuthorization(&_Eip3009.TransactOpts, from, to, value, validAfter, validBefore, nonce, signature)
 }
 
-// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xe3ee160e.
+// TransferWithAuthorization is a paid mutator transaction binding the contract method 0xcf092995.
 //
-// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) returns()
-func (_Eip3009 *Eip3009TransactorSession) TransferWithAuthorization(from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _Eip3009.Contract.TransferWithAuthorization(&_Eip3009.TransactOpts, from, to, value, validAfter, validBefore, nonce, v, r, s)
+// Solidity: function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter, uint256 validBefore, bytes32 nonce, bytes signature) returns()
+func (_Eip3009 *Eip3009TransactorSession) TransferWithAuthorization(from common.Address, to common.Address, value *big.Int, validAfter *big.Int, validBefore *big.Int, nonce [32]byte, signature []byte) (*types.Transaction, error) {
+	return _Eip3009.Contract.TransferWithAuthorization(&_Eip3009.TransactOpts, from, to, value, validAfter, validBefore, nonce, signature)
 }

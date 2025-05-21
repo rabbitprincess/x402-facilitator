@@ -4,22 +4,18 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"math/big"
 	"strings"
 
+	"github.com/decred/dcrd/dcrec/secp256k1/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/sha3"
 )
 
-func GenerateEIP3009Nonce() (string, error) {
+func GenerateEIP3009Nonce() [32]byte {
 	var nonce [32]byte
-	_, err := rand.Read(nonce[:])
-	if err != nil {
-		return "", fmt.Errorf("failed to generate nonce: %w", err)
-	}
-	nonceHex := hex.EncodeToString(nonce[:])
-	return nonceHex, nil
+	rand.Read(nonce[:])
+	return nonce
 }
 
 func Keccak256(data ...[]byte) []byte {
@@ -28,6 +24,18 @@ func Keccak256(data ...[]byte) []byte {
 		h.Write(b)
 	}
 	return h.Sum(nil)
+}
+
+func GetAddrssFromPrivateKey(privateKey []byte) (common.Address, error) {
+	if len(privateKey) != 32 {
+		return common.Address{}, errors.New("invalid private key length")
+	}
+
+	_, pubKey := secp256k1.PrivKeyFromBytes(privateKey)
+	uncompressed := pubKey.SerializeUncompressed()
+	address := common.BytesToAddress(Keccak256(uncompressed[1:])[12:])
+
+	return address, nil
 }
 
 func padAddress(addr common.Address) []byte {
