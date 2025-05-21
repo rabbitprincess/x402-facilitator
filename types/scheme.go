@@ -3,5 +3,6 @@ package types
 type Scheme string
 
 const (
-	EVM Scheme = "evm"
+	EVM    Scheme = "evm"
+	Solana Scheme = "solana"
 )
