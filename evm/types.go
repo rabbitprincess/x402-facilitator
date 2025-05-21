@@ -21,7 +21,7 @@ func NewAuthorization(from, to string, value *big.Int) *Authorization {
 		From:        common.HexToAddress(from),
 		To:          common.HexToAddress(to),
 		Value:       value,
-		ValidAfter:  big.NewInt(now - 12),
+		ValidAfter:  big.NewInt(0),
 		ValidBefore: big.NewInt(now + 3600), // 1 hour
 		Nonce:       GenerateEIP3009Nonce(),
 	}

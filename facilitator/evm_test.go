@@ -14,7 +14,7 @@ import (
 
 const (
 	EVMUrl      = "https://sepolia.base.org"
-	PrivateKey  = "437770403392c618d3e256200c0c28b679a3c2aa73ce55bbf370445f56d72bd2"
+	PrivateKey  = ""
 	X402Version = 1
 	Network     = "base-sepolia"
 	Token       = "USDC"
@@ -31,7 +31,7 @@ func TestEVMSettle(t *testing.T) {
 	facilitator, err := NewEVMFacilitator(types.EVM, EVMUrl, PrivateKey)
 	require.NoError(t, err)
 
-	privKey, err := hex.DecodeString("ef635a97985a15029dea94e7cca2589c688b59bc98b8cd4a90d857048fcbeec1")
+	privKey, err := hex.DecodeString("")
 	require.NoError(t, err)
 	evmPayload, err := evm.GeneratePayload(Network, Token,
 		"", "", big.NewInt(10000), evm.NewRawPrivateSigner(privKey))
