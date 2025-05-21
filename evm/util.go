@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/decred/dcrd/dcrec/secp256k1/v2"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/sha3"
 )
@@ -31,8 +31,8 @@ func GetAddrssFromPrivateKey(privateKey []byte) (common.Address, error) {
 		return common.Address{}, errors.New("invalid private key length")
 	}
 
-	_, pubKey := secp256k1.PrivKeyFromBytes(privateKey)
-	uncompressed := pubKey.SerializeUncompressed()
+	privKey := secp256k1.PrivKeyFromBytes(privateKey)
+	uncompressed := privKey.PubKey().SerializeUncompressed()
 	address := common.BytesToAddress(Keccak256(uncompressed[1:])[12:])
 
 	return address, nil
