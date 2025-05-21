@@ -16,6 +16,8 @@ func NewFacilitator(scheme types.Scheme, url string, privateKeyHex string) (Faci
 	switch scheme {
 	case types.EVM:
 		return NewEVMFacilitator(url, privateKeyHex)
+	case types.Solana:
+		return NewSolanaFacilitator(url, privateKeyHex)
 	default:
 		return nil, fmt.Errorf("unsupporsed scheme: %s", scheme)
 	}
