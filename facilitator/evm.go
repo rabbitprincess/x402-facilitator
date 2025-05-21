@@ -1,7 +1,6 @@
 package facilitator
 
 import (
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -18,9 +17,10 @@ import (
 var _ Facilitator = (*EVMFacilitator)(nil)
 
 type EVMFacilitator struct {
-	scheme types.Scheme
-	client *ethclient.Client
-	signer evm.Signer
+	scheme  types.Scheme
+	client  *ethclient.Client
+	signer  evm.Signer
+	address common.Address
 }
 
 func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*EVMFacilitator, error) {
@@ -34,11 +34,16 @@ func NewEVMFacilitator(scheme types.Scheme, url string, privateKeyHex string) (*
 		return nil, err
 	}
 	signer := evm.NewRawPrivateSigner(privateKey)
+	address, err := evm.GetAddrssFromPrivateKey(privateKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get address from private key: %w", err)
+	}
 
 	return &EVMFacilitator{
-		scheme: scheme,
-		client: client,
-		signer: signer,
+		scheme:  scheme,
+		client:  client,
+		signer:  signer,
+		address: address,
 	}, nil
 }
 
@@ -74,8 +79,8 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	}
 
 	// Step 3: Network info
-	chainID, ok := evm.GetChainID(payload.Network)
-	if !ok {
+	chainID := evm.GetChainID(payload.Network)
+	if chainID == nil {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
 			InvalidReason: "invalid_network",
@@ -90,9 +95,12 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 		return nil, err
 	}
 	digest := evmPayload.Authorization.ToMessageHash()
-	if valid, err := evm.VerifySignature(digest, sig); err != nil {
+	pubkey, err := evm.Ecrecover(digest, sig)
+	if err != nil {
 		return nil, err
-	} else if !valid {
+	}
+
+	if valid := evm.VerifySignature(pubkey, digest, sig); !valid {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
 			InvalidReason: "invalid_signature",
@@ -130,8 +138,8 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 		}, nil
 	}
 
-	networkID, ok := evm.GetChainID(req.Network)
-	if !ok {
+	networkID := evm.GetChainID(req.Network)
+	if networkID == nil {
 		return &types.PaymentSettleResponse{
 			Success: false,
 			Error:   "invalid network",
@@ -139,6 +147,12 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 	}
 
 	contractAddress := common.HexToAddress(req.Asset)
+	if contractAddress == (common.Address{}) {
+		return &types.PaymentSettleResponse{
+			Success: false,
+			Error:   "invalid contract address",
+		}, nil
+	}
 	contract, err := eip3009.NewEip3009(contractAddress, t.client)
 	if err != nil {
 		return nil, fmt.Errorf("contract bind failed: %w", err)
@@ -147,15 +161,20 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode signature: %w", err)
 	}
-
-	r, s, v, err := evm.ParseSignature(sig) // client signature
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse signature: %w", err)
+	if sig[64] < 27 {
+		sig[64] += 27
 	}
+
+	// r, s, v, err := evm.ParseSignature(sig) // client signature
+	// if err != nil {
+	// return nil, fmt.Errorf("failed to parse signature: %w", err)
+	// }
 
 	tx, err := contract.TransferWithAuthorization(
 		&bind.TransactOpts{ // facilitator signature
-			Signer: evm.ToGethSigner(t.signer, networkID),
+			Signer:   evm.ToGethSigner(t.signer, networkID),
+			From:     t.address,
+			GasLimit: 100000,
 		},
 		evmPayload.Authorization.From,
 		evmPayload.Authorization.To,
@@ -163,21 +182,15 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 		evmPayload.Authorization.ValidAfter,
 		evmPayload.Authorization.ValidBefore,
 		evmPayload.Authorization.Nonce,
-		v, r, s,
+		sig,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to transfer with authorization %w", err)
 	}
 
-	err = t.client.SendTransaction(context.Background(), tx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send transaction: %w", err)
-	}
-	txHash := tx.Hash().Hex()
-
 	return &types.PaymentSettleResponse{
 		Success:   true,
-		TxHash:    txHash,
+		TxHash:    tx.Hash().Hex(),
 		NetworkId: fmt.Sprintf("%d", networkID),
 	}, nil
 }
