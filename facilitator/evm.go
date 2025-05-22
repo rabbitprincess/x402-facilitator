@@ -75,7 +75,7 @@ func NewEVMFacilitator(url string, privateKeyHex string) (*EVMFacilitator, error
 //   - ✅ verify value in payload is enough to cover paymentRequirements.maxAmountRequired
 //   - check min amount is above some threshold we think is reasonable for covering gas
 //   - verify resource is not already paid for (next version)
-func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
+func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
 	// Step 1: Payload format
 	var evmPayload evm.EVMPayload
 	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
@@ -158,7 +158,7 @@ func (t *EVMFacilitator) Verify(payload *types.PaymentPayload, req *types.Paymen
 	}, nil
 }
 
-func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
+func (t *EVMFacilitator) Settle(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
 	var evmPayload evm.EVMPayload
 	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
 		return &types.PaymentSettleResponse{
@@ -196,8 +196,9 @@ func (t *EVMFacilitator) Settle(payload *types.PaymentPayload, req *types.Paymen
 
 	tx, err := contract.TransferWithAuthorization(
 		&bind.TransactOpts{
-			Signer: evm.ToGethSigner(t.signer, networkID), // facilitator signature
-			From:   t.address,
+			Context: ctx,
+			Signer:  evm.ToGethSigner(t.signer, networkID), // facilitator signature
+			From:    t.address,
 		},
 		evmPayload.Authorization.From,
 		evmPayload.Authorization.To,

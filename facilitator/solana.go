@@ -1,6 +1,7 @@
 package facilitator
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
 
@@ -36,11 +37,11 @@ func NewSolanaFacilitator(url string, privateKeyHex string) (*SolanaFacilitator,
 	}, nil
 }
 
-func (t *SolanaFacilitator) Verify(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
+func (t *SolanaFacilitator) Verify(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
 	return nil, nil
 }
 
-func (t *SolanaFacilitator) Settle(payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
+func (t *SolanaFacilitator) Settle(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
 	return nil, nil
 }
 

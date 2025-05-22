@@ -54,7 +54,7 @@ func TestEVMSettle(t *testing.T) {
 		Asset:   domainConfig.VerifyingContract.String(),
 	}
 
-	res, err := facilitator.Settle(payload, req)
+	res, err := facilitator.Settle(t.Context(), payload, req)
 	require.NoError(t, err)
 
 	jsonRes, err := json.MarshalIndent(res, "", "\t")
