@@ -16,30 +16,19 @@ var (
 	validate = validator.New(validator.WithRequiredStructEnabled())
 )
 
+type RequestVerify struct {
+	X402Version         int                       `json:"x402Version" validate:"required,eq=1"`
+	PaymentHeader       string                    `json:"paymentHeader" validate:"required"`
+	PaymentRequirements types.PaymentRequirements `json:"paymentRequirements" validate:"required"`
+}
+
 // Verify handles verification requests
-// TODO: Implement actual verification logic
+// Specification:https://github.com/coinbase/x402/tree/3895881f3d6c71fa060076958c8eabc139fcbe5a?tab=readme-ov-file#facilitator-types--interface
 func (s *server) Verify(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	// validate X-PAYMENT header
-	payment := &types.PaymentPayload{}
-	paymentHeader := c.Request().Header.Get("X-PAYMENT")
-	if paymentHeader == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "X-PAYMENT header is required")
-	}
-	paymentDecoded, err := base64.StdEncoding.DecodeString(paymentHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed X-PAYMENT header")
-	}
-	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed X-PAYMENT header")
-	}
-	if err := validate.Struct(payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid X-PAYMENT header")
-	}
-
 	// validate payment requirements
-	requirement := &types.PaymentRequirements{}
+	requirement := &RequestVerify{}
 	if err := json.NewDecoder(c.Request().Body).Decode(requirement); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed payment requirements")
 	}
@@ -47,7 +36,20 @@ func (s *server) Verify(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid payment requirements")
 	}
 
-	verified, err := s.facilitator.Verify(ctx, payment, requirement)
+	// validate payment payload
+	payment := &types.PaymentPayload{}
+	paymentDecoded, err := base64.StdEncoding.DecodeString(requirement.PaymentHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
+	}
+	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
+	}
+	if err := validate.Struct(payment); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid Payment header")
+	}
+
+	verified, err := s.facilitator.Verify(ctx, payment, &requirement.PaymentRequirements)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
