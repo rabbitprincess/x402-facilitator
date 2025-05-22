@@ -1,0 +1,8 @@
+port = 9090 # HTTP Port
+
+# Config for accessing blockchains
+# TODO: support multiple chains. For now, this facilitator only supports one chain at a time
+scheme = "evm"                   # "evm" or "solana"
+network = "base-sepolia"         # Network name
+url = "https://sepolia.base.org" # URL of the blockchain
+private_key = ""                 # Hex encoded private key for ????
