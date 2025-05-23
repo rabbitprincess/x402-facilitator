@@ -19,11 +19,7 @@ func GetChainName(chainID *big.Int) string {
 	if chainID == nil {
 		return ""
 	}
-	name, ok := chainName[int(chainID.Int64())]
-	if !ok {
-		return ""
-	}
-	return name
+	return chainName[int(chainID.Int64())]
 }
 
 type ChainInfo struct {

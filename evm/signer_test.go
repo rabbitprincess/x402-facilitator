@@ -44,7 +44,7 @@ func TestPayloadSignVerify(t *testing.T) {
 	chain := "base-sepolia"
 	token := "USDC"
 
-	payload, err := GeneratePayload(chain, token,
+	payload, err := NewEVMPayload(chain, token,
 		"0x1234567890abcdef1234567890abcdef12345678", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef", big.NewInt(100), signer)
 	require.NoError(t, err)
 	message := HashEip3009(payload.Authorization, GetDomainConfig(chain, token))
