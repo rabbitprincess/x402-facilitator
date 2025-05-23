@@ -6,13 +6,13 @@ import "encoding/json"
 // This corresponds to the server's response in the 402 Payment Required flow.
 type PaymentRequirements struct {
 	// Scheme of the payment protocol to use (e.g., "exact")
-	Scheme string `json:"scheme"`
+	Scheme string `json:"scheme" validate:"required"`
 	// Network of the blockchain to send payment on (e.g., "base-sepolia")
-	Network string `json:"network"`
+	Network string `json:"network" validate:"required"`
 	// Maximum amount required to pay for the resource in atomic units
-	MaxAmountRequired string `json:"maxAmountRequired"`
+	MaxAmountRequired string `json:"maxAmountRequired" validate:"required"`
 	// URL of the resource to pay for
-	Resource string `json:"resource"`
+	Resource string `json:"resource" validate:"required"`
 	// Description of the resource
 	Description string `json:"description"`
 	// MIME type of the resource response
@@ -20,11 +20,11 @@ type PaymentRequirements struct {
 	// Output schema of the resource response (optional)
 	OutputSchema *json.RawMessage `json:"outputSchema,omitempty"`
 	// Address to pay value to
-	PayTo string `json:"payTo"`
+	PayTo string `json:"payTo" validate:"required"`
 	// Maximum time in seconds for the resource server to respond
 	MaxTimeoutSeconds int `json:"maxTimeoutSeconds"`
 	// Address of the EIP-3009 compliant ERC20 contract
-	Asset string `json:"asset"`
+	Asset string `json:"asset" validate:"required"`
 	// Extra information about the payment details specific to the scheme
 	Extra *json.RawMessage `json:"extra,omitempty"`
 }
@@ -32,20 +32,20 @@ type PaymentRequirements struct {
 // PaymentPayload represents the data the client sends in the X-PAYMENT header.
 type PaymentPayload struct {
 	// Version of the x402 payment protocol
-	X402Version int `json:"x402Version"`
+	X402Version int `json:"x402Version" validate:"required,eq=1"`
 	// Scheme value of the accepted paymentRequirements the client is using to pay
-	Scheme string `json:"scheme"`
+	Scheme string `json:"scheme" validate:"required"`
 	// Network ID of the accepted paymentRequirements the client is using to pay
-	Network string `json:"network"`
+	Network string `json:"network" validate:"required"`
 	// Payload is E-dependent and may contain authorization and signature data
-	Payload json.RawMessage `json:"payload"`
+	Payload json.RawMessage `json:"payload" validate:"required"`
 }
 
 // PaymentVerifyRequest is the request body sent to facilitator's /verify endpoint.
 type PaymentVerifyRequest struct {
-	X402Version         int                 `json:"x402Version"`
-	PaymentHeader       string              `json:"paymentHeader"`
-	PaymentRequirements PaymentRequirements `json:"paymentRequirements"`
+	X402Version         int                 `json:"x402Version" validate:"required,eq=1"`
+	PaymentHeader       string              `json:"paymentHeader" validate:"required"`
+	PaymentRequirements PaymentRequirements `json:"paymentRequirements" validate:"required"`
 }
 
 // PaymentVerifyResponse is the response returned from the /verify endpoint.

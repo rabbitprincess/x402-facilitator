@@ -95,8 +95,8 @@ var _ = Describe("Server", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("should return 500 Internal Server Error for now", func() {
-				Expect(statusCode).To(Equal(http.StatusInternalServerError))
+			It("should return 400 Bad Request", func() {
+				Expect(statusCode).To(Equal(http.StatusBadRequest))
 				Expect(respBody).To(HaveKey("message"))
 			})
 		})
@@ -113,8 +113,8 @@ var _ = Describe("Server", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("should return 500 Internal Server Error for now", func() {
-				Expect(statusCode).To(Equal(http.StatusInternalServerError))
+			It("should return 400 Bad Request", func() {
+				Expect(statusCode).To(Equal(http.StatusBadRequest))
 				Expect(respBody).To(HaveKey("message"))
 			})
 		})
