@@ -19,6 +19,10 @@ func NewFacilitator(scheme types.Scheme, url string, privateKeyHex string) (Faci
 		return NewEVMFacilitator(url, privateKeyHex)
 	case types.Solana:
 		return NewSolanaFacilitator(url, privateKeyHex)
+	case types.Sui:
+		return NewSuiFacilitator(url, privateKeyHex)
+	case types.Tron:
+		return NewTronFacilitator(url, privateKeyHex)
 	default:
 		return nil, fmt.Errorf("unsupporsed scheme: %s", scheme)
 	}

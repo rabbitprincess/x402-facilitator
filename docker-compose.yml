@@ -7,7 +7,7 @@ services:
     container_name: x402-facilitator
     command: "/app/facilitator"
     volumes:
-      - ./cmd/facilitator/config.toml:/app/config.toml
+      - ./config.toml:/app/config.toml
     ports:
       - "9000:9000"
     networks:
