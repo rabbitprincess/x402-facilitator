@@ -43,9 +43,9 @@ type PaymentPayload struct {
 
 // PaymentVerifyRequest is the request body sent to facilitator's /verify endpoint.
 type PaymentVerifyRequest struct {
-	X402Version         int                 `json:"x402Version"`
-	PaymentHeader       string              `json:"paymentHeader"`
-	PaymentRequirements PaymentRequirements `json:"paymentRequirements"`
+	X402Version         int                 `json:"x402Version" validate:"required,eq=1"`
+	PaymentHeader       string              `json:"paymentHeader" validate:"required"`
+	PaymentRequirements PaymentRequirements `json:"paymentRequirements" validate:"required"`
 }
 
 // PaymentVerifyResponse is the response returned from the /verify endpoint.

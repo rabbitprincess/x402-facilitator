@@ -16,19 +16,13 @@ var (
 	validate = validator.New(validator.WithRequiredStructEnabled())
 )
 
-type RequestVerify struct {
-	X402Version         int                       `json:"x402Version" validate:"required,eq=1"`
-	PaymentHeader       string                    `json:"paymentHeader" validate:"required"`
-	PaymentRequirements types.PaymentRequirements `json:"paymentRequirements" validate:"required"`
-}
-
 // Verify handles verification requests
 // Specification:https://github.com/coinbase/x402/tree/3895881f3d6c71fa060076958c8eabc139fcbe5a?tab=readme-ov-file#facilitator-types--interface
 func (s *server) Verify(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	// validate payment requirements
-	requirement := &RequestVerify{}
+	requirement := &types.PaymentVerifyRequest{}
 	if err := json.NewDecoder(c.Request().Body).Decode(requirement); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed payment requirements")
 	}
