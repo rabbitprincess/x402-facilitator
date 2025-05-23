@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/rabbitprincess/x402-facilitator/evm"
-	"github.com/rabbitprincess/x402-facilitator/evm/eip3009"
+	"github.com/rabbitprincess/x402-facilitator/scheme/evm"
+	"github.com/rabbitprincess/x402-facilitator/scheme/evm/eip3009"
 	"github.com/rabbitprincess/x402-facilitator/types"
 )
 

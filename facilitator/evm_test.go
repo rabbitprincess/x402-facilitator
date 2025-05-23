@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/rabbitprincess/x402-facilitator/evm"
+	"github.com/rabbitprincess/x402-facilitator/scheme/evm"
 	"github.com/rabbitprincess/x402-facilitator/types"
 	"github.com/stretchr/testify/require"
 )

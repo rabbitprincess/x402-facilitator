@@ -10,10 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/sha3"
-
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/ethereum/go-ethereum/common"
+	"golang.org/x/crypto/sha3"
 
 	"github.com/rabbitprincess/x402-facilitator/types"
 )
