@@ -24,7 +24,7 @@ type EVMFacilitator struct {
 	networkID *big.Int
 
 	client  *ethclient.Client
-	signer  evm.Signer
+	signer  types.Signer
 	address common.Address
 }
 

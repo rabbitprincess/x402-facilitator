@@ -8,10 +8,12 @@ import (
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/v2"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/rabbitprincess/x402-facilitator/types"
 )
 
-func SignEip3009(auth *Authorization, domain *DomainConfig, signer Signer) (string, error) {
+func SignEip3009(auth *Authorization, domain *DomainConfig, signer types.Signer) (string, error) {
 	sig, err := signer(HashEip3009(auth, domain))
 	if err != nil {
 		return "", err
@@ -30,9 +32,7 @@ func HashEip3009(auth *Authorization, domain *DomainConfig) []byte {
 	)
 }
 
-type Signer func(digest []byte) ([]byte, error)
-
-func NewRawPrivateSigner(privateKey []byte) Signer {
+func NewRawPrivateSigner(privateKey []byte) types.Signer {
 	return func(digest []byte) ([]byte, error) {
 		privKey := secp256k1.PrivKeyFromBytes(privateKey)
 
@@ -44,9 +44,9 @@ func NewRawPrivateSigner(privateKey []byte) Signer {
 	}
 }
 
-func ToGethSigner(signer Signer, chainID *big.Int) bind.SignerFn {
-	return func(_ common.Address, tx *types.Transaction) (*types.Transaction, error) {
-		signerObj := types.LatestSignerForChainID(chainID)
+func ToGethSigner(signer types.Signer, chainID *big.Int) bind.SignerFn {
+	return func(_ common.Address, tx *ethTypes.Transaction) (*ethTypes.Transaction, error) {
+		signerObj := ethTypes.LatestSignerForChainID(chainID)
 		digest := signerObj.Hash(tx).Bytes()
 
 		sig, err := signer(digest)

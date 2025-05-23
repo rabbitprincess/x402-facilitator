@@ -33,7 +33,7 @@ func TestEVMSettle(t *testing.T) {
 
 	privKey, err := hex.DecodeString("")
 	require.NoError(t, err)
-	evmPayload, err := evm.GeneratePayload(Network, Token,
+	evmPayload, err := evm.NewEVMPayload(Network, Token,
 		"", "", big.NewInt(10000), evm.NewRawPrivateSigner(privKey))
 	require.NoError(t, err)
 	evmPayloadJson, err := json.Marshal(evmPayload)
