@@ -13,21 +13,13 @@ import (
 )
 
 const (
-	PrivateKey  = ""
-	X402Version = 1
-	Network     = "base-sepolia"
-	Token       = "USDC"
+	PrivateKey = ""
+	Network    = "base-sepolia"
+	Token      = "USDC"
 )
 
-func TestEVMVerify(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(Network, PrivateKey)
-	require.NoError(t, err)
-
-	_ = facilitator
-}
-
 func TestEVMSettle(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(Network, PrivateKey)
+	facilitator, err := NewEVMFacilitator(Network, "", PrivateKey)
 	require.NoError(t, err)
 
 	privKey, err := hex.DecodeString("")
@@ -38,10 +30,8 @@ func TestEVMSettle(t *testing.T) {
 	evmPayloadJson, err := json.Marshal(evmPayload)
 	require.NoError(t, err)
 
-	domainConfig := evm.GetDomainConfig(Network, Token)
-
 	payload := &types.PaymentPayload{
-		X402Version: X402Version,
+		X402Version: int(types.X402VersionV1),
 		Scheme:      string(types.EVM),
 		Network:     Network,
 		Payload:     evmPayloadJson,
@@ -50,7 +40,7 @@ func TestEVMSettle(t *testing.T) {
 	req := &types.PaymentRequirements{
 		Scheme:  string(types.EVM),
 		Network: Network,
-		Asset:   domainConfig.VerifyingContract.String(),
+		Asset:   Token,
 	}
 
 	res, err := facilitator.Settle(t.Context(), payload, req)

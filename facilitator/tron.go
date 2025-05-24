@@ -9,7 +9,7 @@ import (
 type TronFacilitator struct {
 }
 
-func NewTronFacilitator(url string, privateKeyHex string) (*TronFacilitator, error) {
+func NewTronFacilitator(network string, url string, privateKeyHex string) (*TronFacilitator, error) {
 	return &TronFacilitator{}, nil
 }
 

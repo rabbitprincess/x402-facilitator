@@ -9,7 +9,7 @@ import (
 type SuiFacilitator struct {
 }
 
-func NewSuiFacilitator(url string, privateKeyHex string) (*SuiFacilitator, error) {
+func NewSuiFacilitator(network string, url string, privateKeyHex string) (*SuiFacilitator, error) {
 	return &SuiFacilitator{}, nil
 }
 

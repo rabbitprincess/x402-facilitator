@@ -28,26 +28,29 @@ type EVMFacilitator struct {
 	address common.Address
 }
 
-func NewEVMFacilitator(networkOrRpcUrl string, privateKeyHex string) (*EVMFacilitator, error) {
-	var url string
-	if chainInfo := evm.GetChainInfo(networkOrRpcUrl); chainInfo != nil {
-		url = chainInfo.DefaultUrl // if networkName is provided, use default URL
-	} else {
-		url = networkOrRpcUrl // if it's not a known network name, treat it as a URL
+func NewEVMFacilitator(network string, url string, privateKeyHex string) (*EVMFacilitator, error) {
+	if network == "" && url == "" {
+		return nil, fmt.Errorf("network or rpc url must be provided")
+	} else if url == "" {
+		// if url is not provided, use default URL
+		if chainInfo := evm.GetChainInfo(network); chainInfo == nil {
+			return nil, fmt.Errorf("unsupported network name: %s", network)
+		} else {
+			url = chainInfo.DefaultUrl
+		}
 	}
 
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
 	}
-
 	networkId, err := client.NetworkID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network ID: %w", err)
 	}
-	network := evm.GetChainName(networkId)
-	if network == "" {
-		return nil, fmt.Errorf("unsupported network ID: %s", networkId.String())
+	chainName := evm.GetChainName(networkId)
+	if chainName == "" || chainName != network {
+		return nil, fmt.Errorf("unsupported network: %s", network)
 	}
 
 	privateKey, err := hex.DecodeString(privateKeyHex)
