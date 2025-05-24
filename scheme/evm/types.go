@@ -176,18 +176,21 @@ func ParseAddress(hexStr string) (common.Address, error) {
 	return a, nil
 }
 
-func ParseSignature(sig []byte) (r, s [32]byte, v uint8, err error) {
+func ParseSignature(sigHex string) ([]byte, error) {
+	sigHex = strings.TrimPrefix(sigHex, "0x")
+	sig, err := hex.DecodeString(sigHex)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(sig) != 65 {
-		return r, s, 0, errors.New("invalid signature length")
+		return nil, errors.New("invalid signature length")
 	}
-	copy(r[:], sig[0:32])
-	copy(s[:], sig[32:64])
-	v = sig[64]
-	if v < 27 { // normalize v to 27 or 28
-		v += 27
+	if sig[64] < 27 {
+		sig[64] += 27
 	}
-	if v != 27 && v != 28 {
-		return r, s, 0, errors.New("invalid signature v value")
+	if sig[64] != 27 && sig[64] != 28 {
+		return nil, errors.New("invalid signature v value")
 	}
-	return r, s, v, nil
+	return sig, nil
 }

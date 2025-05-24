@@ -30,6 +30,14 @@ type ChainInfo struct {
 	TokenContracts map[string]DomainConfig
 }
 
+func GetChainInfo(chain string) *ChainInfo {
+	chainInfo, ok := chainInfo[chain]
+	if !ok {
+		return nil
+	}
+	return &chainInfo
+}
+
 func GetChainID(chain string) *big.Int {
 	chainInfo, ok := chainInfo[chain]
 	if !ok {
