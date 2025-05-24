@@ -13,7 +13,7 @@ type TronFacilitator struct {
 	feePayer string
 }
 
-func NewTronFacilitator(url string, privateKeyHex string) (*TronFacilitator, error) {
+func NewTronFacilitator(network string, url string, privateKeyHex string) (*TronFacilitator, error) {
 	c := client.NewGrpcClient(url)
 	if err := c.Start(); err != nil {
 		return nil, err

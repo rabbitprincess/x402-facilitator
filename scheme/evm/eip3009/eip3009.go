@@ -31,7 +31,7 @@ var (
 
 // Eip3009MetaData contains all meta data concerning the Eip3009 contract.
 var Eip3009MetaData = &bind.MetaData{
-	ABI: "[{\"name\":\"transferWithAuthorization\",\"type\":\"function\",\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"validAfter\",\"type\":\"uint256\"},{\"name\":\"validBefore\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"bytes32\"},{\"name\":\"signature\",\"type\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"}]",
+	ABI: "[{\"name\":\"transferWithAuthorization\",\"type\":\"function\",\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"validAfter\",\"type\":\"uint256\"},{\"name\":\"validBefore\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"bytes32\"},{\"name\":\"signature\",\"type\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"name\":\"balanceOf\",\"type\":\"function\",\"inputs\":[{\"name\":\"account\",\"type\":\"address\"}],\"outputs\":[{\"name\":\"balance\",\"type\":\"uint256\"}],\"stateMutability\":\"view\"}]",
 }
 
 // Eip3009ABI is the input ABI used to generate the binding from.
@@ -178,6 +178,37 @@ func (_Eip3009 *Eip3009TransactorRaw) Transfer(opts *bind.TransactOpts) (*types.
 // Transact invokes the (paid) contract method with params as input values.
 func (_Eip3009 *Eip3009TransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _Eip3009.Contract.contract.Transact(opts, method, params...)
+}
+
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
+//
+// Solidity: function balanceOf(address account) view returns(uint256 balance)
+func (_Eip3009 *Eip3009Caller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
+	var out []interface{}
+	err := _Eip3009.contract.Call(opts, &out, "balanceOf", account)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
+//
+// Solidity: function balanceOf(address account) view returns(uint256 balance)
+func (_Eip3009 *Eip3009Session) BalanceOf(account common.Address) (*big.Int, error) {
+	return _Eip3009.Contract.BalanceOf(&_Eip3009.CallOpts, account)
+}
+
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
+//
+// Solidity: function balanceOf(address account) view returns(uint256 balance)
+func (_Eip3009 *Eip3009CallerSession) BalanceOf(account common.Address) (*big.Int, error) {
+	return _Eip3009.Contract.BalanceOf(&_Eip3009.CallOpts, account)
 }
 
 // TransferWithAuthorization is a paid mutator transaction binding the contract method 0xcf092995.
