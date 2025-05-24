@@ -13,25 +13,6 @@ import (
 	"github.com/rabbitprincess/x402-facilitator/types"
 )
 
-func SignEip3009(auth *Authorization, domain *DomainConfig, signer types.Signer) (string, error) {
-	sig, err := signer(HashEip3009(auth, domain))
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(sig), nil
-}
-
-func HashEip3009(auth *Authorization, domain *DomainConfig) []byte {
-	domainSeparator := domain.ToMessageHash()
-	messageHash := auth.ToMessageHash()
-
-	// Final EIP-712 hash
-	var prefix = []byte{0x19, 0x01}
-	return Keccak256(
-		append(prefix, append(domainSeparator, messageHash...)...),
-	)
-}
-
 func NewRawPrivateSigner(privateKey []byte) types.Signer {
 	return func(digest []byte) ([]byte, error) {
 		privKey := secp256k1.PrivKeyFromBytes(privateKey)
@@ -58,4 +39,23 @@ func ToGethSigner(signer types.Signer, chainID *big.Int) bind.SignerFn {
 
 		return tx.WithSignature(signerObj, sig)
 	}
+}
+
+func SignEip3009(auth *Authorization, domain *DomainConfig, signer types.Signer) (string, error) {
+	sig, err := signer(HashEip3009(auth, domain))
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(sig), nil
+}
+
+func HashEip3009(auth *Authorization, domain *DomainConfig) []byte {
+	domainSeparator := domain.ToMessageHash()
+	messageHash := auth.ToMessageHash()
+
+	// Final EIP-712 hash
+	var prefix = []byte{0x19, 0x01}
+	return Keccak256(
+		append(prefix, append(domainSeparator, messageHash...)...),
+	)
 }

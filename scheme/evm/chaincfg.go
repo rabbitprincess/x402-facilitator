@@ -34,7 +34,7 @@ var chainInfo = map[string]ChainInfo{
 			"USDC": {
 				Name:              "USD Coin",
 				Version:           "2",
-				ChainID:           1,
+				ChainID:           big.NewInt(1),
 				VerifyingContract: common.HexToAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
 			},
 		},
@@ -45,7 +45,7 @@ var chainInfo = map[string]ChainInfo{
 			"USDC": {
 				Name:              "USD Coin",
 				Version:           "2",
-				ChainID:           8453,
+				ChainID:           big.NewInt(8453),
 				VerifyingContract: common.HexToAddress("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
 			},
 		},
@@ -56,7 +56,7 @@ var chainInfo = map[string]ChainInfo{
 			"USDC": {
 				Name:              "USDC",
 				Version:           "2",
-				ChainID:           84532,
+				ChainID:           big.NewInt(84532),
 				VerifyingContract: common.HexToAddress("0x036CbD53842c5426634e7929541eC2318f3dCF7e"),
 			},
 		},

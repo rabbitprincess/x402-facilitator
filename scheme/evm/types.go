@@ -54,6 +54,8 @@ func NewAuthorization(from, to string, value *big.Int) *Authorization {
 	return authorization
 }
 
+// TransferWithAuthorization represents the payload for an EIP-3009
+// authorization EIP-712 typed data message
 type Authorization struct {
 	From        common.Address
 	To          common.Address
@@ -63,13 +65,14 @@ type Authorization struct {
 	Nonce       [32]byte
 }
 
-func (a Authorization) ToMessageHash() []byte {
-	hash := Keccak256([]byte(
-		"TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"),
-	)
+var (
+	// EIP-3009 domain separator
+	AuthorizationTypeHash = Keccak256([]byte("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"))
+)
 
+func (a Authorization) ToMessageHash() []byte {
 	encoded := bytes.Join([][]byte{
-		hash,
+		AuthorizationTypeHash,
 		padAddress(a.From),
 		padAddress(a.To),
 		padBigInt(a.Value),
@@ -80,7 +83,7 @@ func (a Authorization) ToMessageHash() []byte {
 	return Keccak256(encoded)
 }
 
-func NewDomainConfig(name, version string, chainID int64, verifyingContract string) *DomainConfig {
+func NewDomainConfig(name, version string, chainID *big.Int, verifyingContract string) *DomainConfig {
 	return &DomainConfig{
 		Name:              name,
 		Version:           version,
@@ -89,24 +92,28 @@ func NewDomainConfig(name, version string, chainID int64, verifyingContract stri
 	}
 }
 
+// DomainConfig represents the domain configuration for EIP-712
+// typed data messages
 type DomainConfig struct {
 	Name              string
 	Version           string
-	ChainID           int64
+	ChainID           *big.Int
 	VerifyingContract common.Address
 }
 
+var (
+	// EIP-712 domain separator
+	DomainTypeHash = Keccak256([]byte("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"))
+)
+
 func (d DomainConfig) ToMessageHash() []byte {
-	hash := Keccak256([]byte(
-		"EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-	)
 	nameHash := Keccak256([]byte(d.Name))
 	versionHash := Keccak256([]byte(d.Version))
-	chainID := padBigInt(big.NewInt(d.ChainID))
+	chainID := padBigInt(d.ChainID)
 	contract := padAddress(d.VerifyingContract)
 
 	return Keccak256(
-		hash,
+		DomainTypeHash,
 		nameHash,
 		versionHash,
 		chainID,
