@@ -34,7 +34,10 @@ func sigToPub(hash, sig []byte) (*secp256k1.PublicKey, error) {
 	}
 	// Convert to secp256k1 input format with 'recovery id' v at the beginning.
 	btcsig := make([]byte, SignatureLength)
-	btcsig[0] = sig[RecoveryIDOffset] + 27
+	btcsig[0] = sig[RecoveryIDOffset]
+	if btcsig[0] < 27 {
+		btcsig[0] += 27
+	}
 	copy(btcsig[1:], sig)
 
 	pub, _, err := decred_ecdsa.RecoverCompact(btcsig, hash)
