@@ -46,10 +46,9 @@ func run() {
 	}
 	log.Logger = zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
 
-	facilitator, err := facilitator.NewFacilitator(config.Scheme, config.Url, config.PrivateKey)
+	facilitator, err := facilitator.NewFacilitator(config.Scheme, config.Network, config.Url, config.PrivateKey)
 	if err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to create facilitator, shutting down...")
+		log.Fatal().Err(err).Msg("Failed to create facilitator, shutting down...")
 	}
 
 	api := api.NewServer(facilitator)

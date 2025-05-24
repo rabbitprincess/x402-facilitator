@@ -17,7 +17,7 @@ type SolanaFacilitator struct {
 	feePayer solTypes.Account
 }
 
-func NewSolanaFacilitator(url string, privateKeyHex string) (*SolanaFacilitator, error) {
+func NewSolanaFacilitator(network string, url string, privateKeyHex string) (*SolanaFacilitator, error) {
 	client := client.NewClient(url)
 
 	privKey, err := hex.DecodeString(privateKeyHex)
