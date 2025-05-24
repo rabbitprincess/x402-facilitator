@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	EVMUrl      = "https://sepolia.base.org"
 	PrivateKey  = ""
 	X402Version = 1
 	Network     = "base-sepolia"
@@ -21,14 +20,14 @@ const (
 )
 
 func TestEVMVerify(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(EVMUrl, PrivateKey)
+	facilitator, err := NewEVMFacilitator(Network, PrivateKey)
 	require.NoError(t, err)
 
 	_ = facilitator
 }
 
 func TestEVMSettle(t *testing.T) {
-	facilitator, err := NewEVMFacilitator(EVMUrl, PrivateKey)
+	facilitator, err := NewEVMFacilitator(Network, PrivateKey)
 	require.NoError(t, err)
 
 	privKey, err := hex.DecodeString("")

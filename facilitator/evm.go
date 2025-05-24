@@ -28,7 +28,14 @@ type EVMFacilitator struct {
 	address common.Address
 }
 
-func NewEVMFacilitator(url string, privateKeyHex string) (*EVMFacilitator, error) {
+func NewEVMFacilitator(networkOrRpcUrl string, privateKeyHex string) (*EVMFacilitator, error) {
+	var url string
+	if chainInfo := evm.GetChainInfo(networkOrRpcUrl); chainInfo != nil {
+		url = chainInfo.DefaultUrl // if networkName is provided, use default URL
+	} else {
+		url = networkOrRpcUrl // if it's not a known network name, treat it as a URL
+	}
+
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to Ethereum client: %w", err)
@@ -81,25 +88,24 @@ func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
-			InvalidReason: fmt.Sprintf("Invalid payload format: %v", err),
+			InvalidReason: types.ErrInvalidPayloadFormat.Error(),
 		}, nil
 	}
 
 	// Step 2: Scheme verification
 	if payload.Scheme != string(t.scheme) || req.Scheme != string(t.scheme) {
 		return &types.PaymentVerifyResponse{
-			IsValid: false,
-			InvalidReason: fmt.Sprintf("Incompatible payload scheme. payload: %s, paymentRequirements: %s, supported: %s",
-				payload.Scheme, req.Scheme, t.scheme),
-			Payer: evmPayload.Authorization.From.String(),
+			IsValid:       false,
+			InvalidReason: types.ErrIncompatibleScheme.Error(),
+			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
 
-	// Step 3: Network info
+	// Step 3: Network info and Contract info
 	if payload.Network != t.network {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
-			InvalidReason: "network_mismatch",
+			InvalidReason: types.ErrNetworkMismatch.Error(),
 			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
@@ -107,20 +113,28 @@ func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 	if chainID == nil {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
-			InvalidReason: "invalid_network",
+			InvalidReason: types.ErrInvalidNetwork.Error(),
 			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
 	if chainID.Cmp(t.networkID) != 0 {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
-			InvalidReason: "network_id_mismatch",
+			InvalidReason: types.ErrNetworkIDMismatch.Error(),
+			Payer:         evmPayload.Authorization.From.String(),
+		}, nil
+	}
+	domainConfig := evm.GetDomainConfig(payload.Network, req.Asset)
+	if domainConfig == nil {
+		return &types.PaymentVerifyResponse{
+			IsValid:       false,
+			InvalidReason: types.ErrTokenMismatch.Error(),
 			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
 
 	// Step 4: Verify signature (EIP-712)
-	sig, err := hex.DecodeString(evmPayload.Signature)
+	sig, err := evm.ParseSignature(evmPayload.Signature)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +146,7 @@ func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 	if valid := evm.VerifySignature(pubkey, digest, sig); !valid {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
-			InvalidReason: "invalid_signature",
+			InvalidReason: types.ErrInvalidSignature.Error(),
 			Payer:         evmPayload.Authorization.From.String(),
 		}, nil
 	}
@@ -144,6 +158,21 @@ func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 	// Step 7: TODO: Nonce freshness check (optional in v1)
 
 	// Step 8: Check ERC20 balance
+	contract, err := eip3009.NewEip3009(domainConfig.VerifyingContract, t.client)
+	if err != nil {
+		return nil, fmt.Errorf("contract bind failed: %w", err)
+	}
+	balance, err := contract.BalanceOf(&bind.CallOpts{Context: ctx}, evmPayload.Authorization.From)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get balance: %w", err)
+	}
+	if balance.Cmp(evmPayload.Authorization.Value) < 0 {
+		return &types.PaymentVerifyResponse{
+			IsValid:       false,
+			InvalidReason: types.ErrInsufficientBalance.Error(),
+			Payer:         evmPayload.Authorization.From.String(),
+		}, nil
+	}
 
 	// Step 9: Check value in permit matches requirement
 
@@ -163,7 +192,7 @@ func (t *EVMFacilitator) Settle(ctx context.Context, payload *types.PaymentPaylo
 	if err := json.Unmarshal([]byte(payload.Payload), &evmPayload); err != nil {
 		return &types.PaymentSettleResponse{
 			Success: false,
-			Error:   fmt.Sprintf("invalid payload format: %v", err),
+			Error:   types.ErrInvalidPayloadFormat.Error(),
 		}, nil
 	}
 
@@ -171,27 +200,24 @@ func (t *EVMFacilitator) Settle(ctx context.Context, payload *types.PaymentPaylo
 	if networkID == nil {
 		return &types.PaymentSettleResponse{
 			Success: false,
-			Error:   "invalid network",
+			Error:   types.ErrInvalidNetwork.Error(),
 		}, nil
 	}
 
-	contractAddress := common.HexToAddress(req.Asset)
-	if contractAddress == (common.Address{}) {
+	domainConfig := evm.GetDomainConfig(payload.Network, req.Asset)
+	if domainConfig == nil {
 		return &types.PaymentSettleResponse{
 			Success: false,
-			Error:   "invalid contract address",
+			Error:   types.ErrTokenMismatch.Error(),
 		}, nil
 	}
-	contract, err := eip3009.NewEip3009(contractAddress, t.client)
+	contract, err := eip3009.NewEip3009(domainConfig.VerifyingContract, t.client)
 	if err != nil {
 		return nil, fmt.Errorf("contract bind failed: %w", err)
 	}
-	clientSig, err := hex.DecodeString(evmPayload.Signature) // client signature
+	clientSig, err := evm.ParseSignature(evmPayload.Signature) // client signature
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode signature: %w", err)
-	}
-	if clientSig[64] < 27 {
-		clientSig[64] += 27
+		return nil, err
 	}
 
 	tx, err := contract.TransferWithAuthorization(

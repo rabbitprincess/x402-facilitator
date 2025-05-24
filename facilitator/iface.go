@@ -13,16 +13,16 @@ type Facilitator interface {
 	Supported() []*types.SupportedKind
 }
 
-func NewFacilitator(scheme types.Scheme, url string, privateKeyHex string) (Facilitator, error) {
+func NewFacilitator(scheme types.Scheme, networkOrRpcUrl string, privateKeyHex string) (Facilitator, error) {
 	switch scheme {
 	case types.EVM:
-		return NewEVMFacilitator(url, privateKeyHex)
+		return NewEVMFacilitator(networkOrRpcUrl, privateKeyHex)
 	case types.Solana:
-		return NewSolanaFacilitator(url, privateKeyHex)
+		return NewSolanaFacilitator(networkOrRpcUrl, privateKeyHex)
 	case types.Sui:
-		return NewSuiFacilitator(url, privateKeyHex)
+		return NewSuiFacilitator(networkOrRpcUrl, privateKeyHex)
 	case types.Tron:
-		return NewTronFacilitator(url, privateKeyHex)
+		return NewTronFacilitator(networkOrRpcUrl, privateKeyHex)
 	default:
 		return nil, fmt.Errorf("unsupporsed scheme: %s", scheme)
 	}
