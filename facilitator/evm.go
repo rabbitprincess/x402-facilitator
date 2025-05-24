@@ -143,7 +143,7 @@ func (t *EVMFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 	if err != nil {
 		return nil, err
 	}
-	if valid := evm.VerifySignature(pubkey, digest, sig); !valid {
+	if valid := evm.VerifySignature(pubkey, digest, sig[:64]); !valid {
 		return &types.PaymentVerifyResponse{
 			IsValid:       false,
 			InvalidReason: types.ErrInvalidSignature.Error(),
