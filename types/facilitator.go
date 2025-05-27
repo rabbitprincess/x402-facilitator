@@ -2,6 +2,8 @@ package types
 
 import "encoding/json"
 
+// Specification: https://github.com/coinbase/x402/tree/main?tab=readme-ov-file#type-specifications
+
 // PaymentRequirements defines the structure for accepted payments by the resource server.
 // This corresponds to the server's response in the 402 Payment Required flow.
 type PaymentRequirements struct {
