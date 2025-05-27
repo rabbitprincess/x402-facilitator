@@ -12,7 +12,7 @@ type Config struct {
 	Network    string       `mapstructure:"network"`
 	Port       int          `mapstructure:"port"`
 	Url        string       `mapstructure:"url"`
-	PrivateKey string       `mapstructure:"private_key"`
+	PrivateKey string       `mapstructure:"privateKey"`
 }
 
 func LoadConfig(path string) (*Config, error) {

@@ -30,7 +30,7 @@ var (
 
 func init() {
 	cmd.PersistentFlags().
-		StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
+		StringVarP(&configPath, "config", "c", "../../config.toml", "Path to the configuration file")
 }
 
 func main() {
@@ -48,7 +48,7 @@ func run() {
 
 	facilitator, err := facilitator.NewFacilitator(config.Scheme, config.Network, config.Url, config.PrivateKey)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create facilitator, shutting down...")
+		log.Fatal().Err(err).Msg("Failed to init facilitator, shutting down...")
 	}
 
 	api := api.NewServer(facilitator)

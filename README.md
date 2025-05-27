@@ -13,3 +13,8 @@ It Supports facilitator and client roles on EVM-compatible chains.
 ```bash
 docker compose up
 ```
+
+# Api Specification
+```
+/swagger/index.html
+```
