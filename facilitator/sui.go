@@ -3,6 +3,7 @@ package facilitator
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -58,6 +59,14 @@ func (t *SuiFacilitator) Verify(ctx context.Context, payload *types.PaymentPaylo
 }
 
 func (t *SuiFacilitator) Settle(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
+	var suiPayload sui.SuiPayload
+	if err := json.Unmarshal([]byte(payload.Payload), &suiPayload); err != nil {
+		return &types.PaymentSettleResponse{
+			Success: false,
+			Error:   types.ErrInvalidPayloadFormat.Error(),
+		}, nil
+	}
+
 	return nil, nil
 }
 

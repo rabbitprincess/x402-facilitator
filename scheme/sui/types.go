@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"golang.org/x/crypto/blake2b"
+
+	"github.com/mr-tron/base58"
+	"github.com/rabbitprincess/x402-facilitator/types"
 )
 
 const (
@@ -14,6 +17,31 @@ const (
 
 	SchemeEd25519 = 0
 )
+
+func NewSuiPayload(sign types.Signer) (*SuiPayload, error) {
+	digest := make([]byte, 1+PUBKEY_SIZE)
+	signature, err := sign(digest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign payload: %w", err)
+	}
+
+	return &SuiPayload{
+		Signature: base58.Encode(signature),
+		// Transaction: Transaction{},
+	}, nil
+}
+
+type SuiPayload struct {
+	Signature   string         `json:"signature"`
+	Transaction SuiTransaction `json:"transaction"`
+}
+
+func NewSponsoredTransaction(from, to, sponser string) *SuiTransaction {
+	return &SuiTransaction{}
+}
+
+type SuiTransaction struct {
+}
 
 func NewAddressFromPrivateKey(privateKey []byte) ([]byte, error) {
 	if len(privateKey) != ed25519.PrivateKeySize {
@@ -27,11 +55,4 @@ func NewAddressFromPrivateKey(privateKey []byte) ([]byte, error) {
 	hash := blake2b.Sum256(msg)
 	address := hash[:ADDRESS_SIZE]
 	return address, nil
-}
-
-// ExactEvmPayloadAuthorization represents the payload for an exact EVM payment ERC-3009
-// authorization EIP-712 typed data message
-type SuiPayload struct {
-	Signature string `json:"signature"`
-	// Transaction Transaction `json:"authorization"`
 }
