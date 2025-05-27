@@ -5,5 +5,5 @@ port = 9090 # HTTP Port
 scheme = "evm"                   # "evm", "solana", "sui", "tron"
 network = "base-sepolia"         # Network name
 url = "https://sepolia.base.org" # URL of the blockchain
-privateKey = "ef635a97985a15029dea94e7cca2589c688b59bc98b8cd4a90d857048fcbeec1"
+privateKey = ""
 
