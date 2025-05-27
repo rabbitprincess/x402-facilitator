@@ -19,9 +19,6 @@ import (
 // @title        x402 Facilitator API
 // @version      1.0
 // @description  API server for x402 payment facilitator
-// @host         localhost:8080
-// @BasePath     /
-// @schemes      http
 type server struct {
 	*echo.Echo
 	facilitator facilitator.Facilitator
