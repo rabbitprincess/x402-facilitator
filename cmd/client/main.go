@@ -37,7 +37,7 @@ func init() {
 	fs.StringVarP(&token, "token", "t", "USDC", "token contract for sending")
 	fs.StringVarP(&from, "from", "F", "", "Sender address")
 	fs.StringVarP(&to, "to", "T", "", "Recipient address")
-	fs.StringVarP(&amount, "amount", "A", "100", "Amount to send")
+	fs.StringVarP(&amount, "amount", "A", "", "Amount to send")
 	fs.StringVarP(&privkey, "privkey", "P", "", "Sender private key")
 }
 
