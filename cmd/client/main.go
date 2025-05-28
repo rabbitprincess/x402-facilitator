@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/hex"
 	"encoding/json"
-	"math/big"
 
 	"github.com/rabbitprincess/x402-facilitator/api/client"
 	"github.com/rabbitprincess/x402-facilitator/scheme/evm"
@@ -32,13 +31,13 @@ var (
 func init() {
 	fs := cmd.PersistentFlags()
 
-	fs.StringVarP(&url, "url", "u", "http://localhost:8080", "Base URL of the facilitator server")
+	fs.StringVarP(&url, "url", "u", "http://localhost:9090", "Base URL of the facilitator server")
 	fs.StringVarP(&scheme, "scheme", "s", "evm", "Scheme to use")
 	fs.StringVarP(&network, "network", "n", "base-sepolia", "Blockchain network to use")
-	fs.StringVarP(&token, "token", "t", "usdc", "token contract for sending")
+	fs.StringVarP(&token, "token", "t", "USDC", "token contract for sending")
 	fs.StringVarP(&from, "from", "F", "", "Sender address")
 	fs.StringVarP(&to, "to", "T", "", "Recipient address")
-	fs.StringVarP(&amount, "amount", "A", "0", "Amount to send")
+	fs.StringVarP(&amount, "amount", "A", "100", "Amount to send")
 	fs.StringVarP(&privkey, "privkey", "P", "", "Sender private key")
 }
 
@@ -49,22 +48,23 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	log.Info().Msg("Running x402-client with the following parameters:")
+	client, err := client.NewClient(url)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create client")
+	}
+
 	// Here you would implement the logic to interact with the facilitator server
 	// using the provided parameters.
+	log.Info().Msg("Sending payment request")
 	var paymentPayload *types.PaymentPayload
 	var paymentRequirements *types.PaymentRequirements
 	switch scheme {
 	case "evm":
-		amountBig, ok := big.NewInt(0).SetString(amount, 10)
-		if !ok {
-			log.Fatal().Str("amount", amount).Msg("Invalid amount provided")
-		}
 		priv, err := hex.DecodeString(privkey)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to decode private key")
 		}
-		evmPayload, err := evm.NewEVMPayload(network, token, from, to, amountBig, evm.NewRawPrivateSigner(priv))
+		evmPayload, err := evm.NewEVMPayload(network, token, from, to, amount, evm.NewRawPrivateSigner(priv))
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create EVM payload")
 		}
@@ -86,10 +86,6 @@ func run(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	client, err := client.NewClient(url)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create client")
-	}
 	verifyResp, err := client.Verify(cmd.Context(), paymentPayload, paymentRequirements)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to verify payment")

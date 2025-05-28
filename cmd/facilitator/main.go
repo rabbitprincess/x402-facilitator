@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	cmd.PersistentFlags().StringVarP(&configPath, "config", "c", "../../config.toml", "Path to the configuration file")
+	cmd.PersistentFlags().StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
 }
 
 func main() {

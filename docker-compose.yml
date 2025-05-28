@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: x402-facilitator:latest
+    image: dreamcacao/x402-facilitator:latest
     container_name: x402-facilitator
     command: "/app/facilitator"
     volumes:

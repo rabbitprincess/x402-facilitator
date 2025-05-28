@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 	_ "github.com/rabbitprincess/x402-facilitator/api/swagger"
@@ -48,10 +47,6 @@ func NewServer(facilitator facilitator.Facilitator) *server {
 	return s
 }
 
-var (
-	validate = validator.New(validator.WithRequiredStructEnabled())
-)
-
 // Settle handles payment settlement requests
 // @Summary      Settle payment
 // @Description  Settle a payment using the facilitator
@@ -70,9 +65,7 @@ func (s *server) Settle(c echo.Context) error {
 	if err := json.NewDecoder(c.Request().Body).Decode(requirement); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed settlement request")
 	}
-	if err := validate.Struct(requirement); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid settlement request")
-	}
+
 	payment := &types.PaymentPayload{}
 	paymentDecoded, err := base64.StdEncoding.DecodeString(requirement.PaymentHeader)
 	if err != nil {
@@ -81,9 +74,7 @@ func (s *server) Settle(c echo.Context) error {
 	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
 	}
-	if err := validate.Struct(payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid Payment header")
-	}
+
 	settle, err := s.facilitator.Settle(ctx, payment, &requirement.PaymentRequirements)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -110,9 +101,6 @@ func (s *server) Verify(c echo.Context) error {
 	if err := json.NewDecoder(c.Request().Body).Decode(requirement); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed payment requirements")
 	}
-	if err := validate.Struct(requirement); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid payment requirements")
-	}
 
 	// validate payment payload
 	payment := &types.PaymentPayload{}
@@ -122,9 +110,6 @@ func (s *server) Verify(c echo.Context) error {
 	}
 	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
-	}
-	if err := validate.Struct(payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received invalid Payment header")
 	}
 
 	verified, err := s.facilitator.Verify(ctx, payment, &requirement.PaymentRequirements)
