@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   echo.HTTPError:
     properties:
@@ -106,7 +105,6 @@ definitions:
       scheme:
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: API server for x402 payment facilitator
@@ -192,6 +190,4 @@ paths:
       summary: Verify payment
       tags:
       - payments
-schemes:
-- http
 swagger: "2.0"
