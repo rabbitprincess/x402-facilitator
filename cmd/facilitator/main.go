@@ -17,7 +17,7 @@ import (
 )
 
 var cmd = &cobra.Command{
-	Use:   "facilitator",
+	Use:   "x402-facilitator",
 	Short: "Start the facilitator server",
 	Run: func(cmd *cobra.Command, args []string) {
 		run()
@@ -29,8 +29,7 @@ var (
 )
 
 func init() {
-	cmd.PersistentFlags().
-		StringVarP(&configPath, "config", "c", "../../config.toml", "Path to the configuration file")
+	cmd.PersistentFlags().StringVarP(&configPath, "config", "c", "config.toml", "Path to the configuration file")
 }
 
 func main() {
@@ -62,8 +61,7 @@ func run() {
 	go func() {
 		log.Info().Msgf("Starting server on port %d", config.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal().Err(err).
-				Msg("Failed to start server, shutting down...")
+			log.Fatal().Err(err).Msg("Failed to start server, shutting down...")
 		}
 	}()
 
@@ -77,9 +75,7 @@ func run() {
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to shutdown server gracefully")
+		log.Fatal().Err(err).Msg("Failed to shutdown server gracefully")
 	}
-	log.Info().
-		Msg("Server shutdown gracefully")
+	log.Info().Msg("Server shutdown gracefully")
 }

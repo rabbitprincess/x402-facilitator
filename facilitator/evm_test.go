@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"testing"
 
 	"github.com/rabbitprincess/x402-facilitator/scheme/evm"
@@ -25,7 +24,7 @@ func TestEVMVerify(t *testing.T) {
 	privKey, err := hex.DecodeString("")
 	require.NoError(t, err)
 	evmPayload, err := evm.NewEVMPayload(Network, Token,
-		"", "", big.NewInt(10000), evm.NewRawPrivateSigner(privKey))
+		"", "", "10000", evm.NewRawPrivateSigner(privKey))
 	require.NoError(t, err)
 
 	evmPayloadJson, err := json.Marshal(evmPayload)
@@ -57,7 +56,7 @@ func TestEVMSettle(t *testing.T) {
 	privKey, err := hex.DecodeString("")
 	require.NoError(t, err)
 	evmPayload, err := evm.NewEVMPayload(Network, Token,
-		"", "", big.NewInt(10000), evm.NewRawPrivateSigner(privKey))
+		"", "", "10000", evm.NewRawPrivateSigner(privKey))
 	require.NoError(t, err)
 	evmPayloadJson, err := json.Marshal(evmPayload)
 	require.NoError(t, err)

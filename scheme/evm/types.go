@@ -17,8 +17,12 @@ import (
 	"github.com/rabbitprincess/x402-facilitator/types"
 )
 
-func NewEVMPayload(chain, token, from, to string, value *big.Int, signer types.Signer) (*EVMPayload, error) {
-	authorization := NewAuthorization(from, to, value)
+func NewEVMPayload(chain, token, from, to string, value string, signer types.Signer) (*EVMPayload, error) {
+	valueBig, ok := big.NewInt(0).SetString(value, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid value: %s", value)
+	}
+	authorization := NewAuthorization(from, to, valueBig)
 	domain := GetDomainConfig(chain, token)
 	if domain == nil {
 		return nil, fmt.Errorf("domain config not found for chain %s and token %s", chain, token)

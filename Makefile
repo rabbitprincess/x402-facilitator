@@ -1,6 +1,10 @@
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-run:
+build:
+	go build -o $(ROOT_DIR)/bin/facilitator $(ROOT_DIR)/cmd/facilitator
+	go build -o $(ROOT_DIR)/bin/client $(ROOT_DIR)/cmd/client
+
+run-facilitator:
 	go run $(ROOT_DIR)/cmd/facilitator \
 		--config $(ROOT_DIR)/config.toml
 

@@ -3,6 +3,7 @@
 **x402-facilitator** is a Go-based middleware that settles on-chain payments authorized via the [x402 protocol](https://x402.dev).
 
 ## Prerequisites
+- Golang 1.24 or later
 - Docker
 - Docker Compose
 
@@ -14,9 +15,33 @@
 | Sui       | 🚧 Planned        |                               |
 | Tron      | 🚧 Planned        |                               |
 
-# How to run
+## How to run
+
+### Build binary
+```bash
+make build
+```
+
+### Run x402-facilitator using docker
 ```bash
 docker compose up
+```
+
+### Run x402-client
+```
+Usage:
+  client [flags]
+
+Flags:
+  -A, --amount string    Amount to send
+  -F, --from string      Sender address
+  -h, --help             help for x402-client
+  -n, --network string   Blockchain network to use (default "base-sepolia")
+  -P, --privkey string   Sender private key
+  -s, --scheme string    Scheme to use (default "evm")
+  -T, --to string        Recipient address
+  -t, --token string     token contract for sending (default "USDC")
+  -u, --url string       Base URL of the facilitator server (default "http://localhost:9090")
 ```
 
 ## Api Specification
