@@ -144,16 +144,32 @@ const docTemplate = `{
                 "message": {}
             }
         },
+        "types.PaymentPayload": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "description": "Network ID of the accepted paymentRequirements the client is using to pay",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "Payload is E-dependent and may contain authorization and signature data",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "scheme": {
+                    "description": "Scheme value of the accepted paymentRequirements the client is using to pay",
+                    "type": "string"
+                },
+                "x402Version": {
+                    "description": "Version of the x402 payment protocol",
+                    "type": "integer"
+                }
+            }
+        },
         "types.PaymentRequirements": {
             "type": "object",
-            "required": [
-                "asset",
-                "maxAmountRequired",
-                "network",
-                "payTo",
-                "resource",
-                "scheme"
-            ],
             "properties": {
                 "asset": {
                     "description": "Address of the EIP-3009 compliant ERC20 contract",
@@ -211,7 +227,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "paymentHeader": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.PaymentPayload"
                 },
                 "paymentRequirements": {
                     "$ref": "#/definitions/types.PaymentRequirements"
@@ -244,14 +260,9 @@ const docTemplate = `{
         },
         "types.PaymentVerifyRequest": {
             "type": "object",
-            "required": [
-                "paymentHeader",
-                "paymentRequirements",
-                "x402Version"
-            ],
             "properties": {
                 "paymentHeader": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.PaymentPayload"
                 },
                 "paymentRequirements": {
                     "$ref": "#/definitions/types.PaymentRequirements"

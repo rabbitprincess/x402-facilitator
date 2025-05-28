@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
@@ -61,21 +60,12 @@ func NewServer(facilitator facilitator.Facilitator) *server {
 func (s *server) Settle(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	requirement := &types.PaymentSettleRequest{}
-	if err := json.NewDecoder(c.Request().Body).Decode(requirement); err != nil {
+	settleRequest := &types.PaymentSettleRequest{}
+	if err := json.NewDecoder(c.Request().Body).Decode(settleRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed settlement request")
 	}
 
-	payment := &types.PaymentPayload{}
-	paymentDecoded, err := base64.StdEncoding.DecodeString(requirement.PaymentHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
-	}
-	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
-	}
-
-	settle, err := s.facilitator.Settle(ctx, payment, &requirement.PaymentRequirements)
+	settle, err := s.facilitator.Settle(ctx, &settleRequest.PaymentHeader, &settleRequest.PaymentRequirements)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -102,17 +92,7 @@ func (s *server) Verify(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed payment requirements")
 	}
 
-	// validate payment payload
-	payment := &types.PaymentPayload{}
-	paymentDecoded, err := base64.StdEncoding.DecodeString(requirement.PaymentHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
-	}
-	if err := json.Unmarshal(paymentDecoded, payment); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Received malformed Payment header")
-	}
-
-	verified, err := s.facilitator.Verify(ctx, payment, &requirement.PaymentRequirements)
+	verified, err := s.facilitator.Verify(ctx, &requirement.PaymentHeader, &requirement.PaymentRequirements)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -3,6 +3,26 @@ definitions:
     properties:
       message: {}
     type: object
+  types.PaymentPayload:
+    properties:
+      network:
+        description: Network ID of the accepted paymentRequirements the client is
+          using to pay
+        type: string
+      payload:
+        description: Payload is E-dependent and may contain authorization and signature
+          data
+        items:
+          type: integer
+        type: array
+      scheme:
+        description: Scheme value of the accepted paymentRequirements the client is
+          using to pay
+        type: string
+      x402Version:
+        description: Version of the x402 payment protocol
+        type: integer
+    type: object
   types.PaymentRequirements:
     properties:
       asset:
@@ -42,18 +62,11 @@ definitions:
       scheme:
         description: Scheme of the payment protocol to use (e.g., "exact")
         type: string
-    required:
-    - asset
-    - maxAmountRequired
-    - network
-    - payTo
-    - resource
-    - scheme
     type: object
   types.PaymentSettleRequest:
     properties:
       paymentHeader:
-        type: string
+        $ref: '#/definitions/types.PaymentPayload'
       paymentRequirements:
         $ref: '#/definitions/types.PaymentRequirements'
       x402Version:
@@ -77,15 +90,11 @@ definitions:
   types.PaymentVerifyRequest:
     properties:
       paymentHeader:
-        type: string
+        $ref: '#/definitions/types.PaymentPayload'
       paymentRequirements:
         $ref: '#/definitions/types.PaymentRequirements'
       x402Version:
         type: integer
-    required:
-    - paymentHeader
-    - paymentRequirements
-    - x402Version
     type: object
   types.PaymentVerifyResponse:
     properties:

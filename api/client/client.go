@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,15 +39,9 @@ func (c *Client) Supported(ctx context.Context) ([]types.SupportedKind, error) {
 }
 
 func (c *Client) Verify(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentVerifyResponse, error) {
-	payloadJson, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("marshal payment payload: %w", err)
-	}
-	header := base64.StdEncoding.EncodeToString(payloadJson)
-
 	body := types.PaymentVerifyRequest{
 		X402Version:         int(types.X402VersionV1),
-		PaymentHeader:       header,
+		PaymentHeader:       *payload,
 		PaymentRequirements: *req,
 	}
 
@@ -61,15 +54,9 @@ func (c *Client) Verify(ctx context.Context, payload *types.PaymentPayload, req 
 
 // Settle sends a payment settlement request.
 func (c *Client) Settle(ctx context.Context, payload *types.PaymentPayload, req *types.PaymentRequirements) (*types.PaymentSettleResponse, error) {
-	payloadJson, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("marshal payment payload: %w", err)
-	}
-	header := base64.StdEncoding.EncodeToString(payloadJson)
-
 	body := types.PaymentSettleRequest{
 		X402Version:         int(types.X402VersionV1),
-		PaymentHeader:       header,
+		PaymentHeader:       *payload,
 		PaymentRequirements: *req,
 	}
 
