@@ -1,15 +1,15 @@
 ROOT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 build:
-	go build -o $(ROOT_DIR)/bin/facilitator $(ROOT_DIR)/cmd/facilitator
-	go build -o $(ROOT_DIR)/bin/client $(ROOT_DIR)/cmd/client
+	go build -o $(ROOT_DIR)/bin/x402-facilitator $(ROOT_DIR)/cmd/facilitator
+	go build -o $(ROOT_DIR)/bin/x402-client $(ROOT_DIR)/cmd/client
 
-run-facilitator:
-	go run $(ROOT_DIR)/cmd/facilitator \
-		--config $(ROOT_DIR)/config.toml
-
-test-e2e:
-	go test -v $(ROOT_DIR)/test/e2e
+build-docker:
+	docker buildx build \
+	--platform linux/amd64,linux/arm64 \
+	-t dreamcacao/x402-facilitator:0.0.0 \
+	-t dreamcacao/x402-facilitator:latest \
+	--push .
 
 generate-api:
 	swag init -g api/server.go -o api/swagger --parseDependency
